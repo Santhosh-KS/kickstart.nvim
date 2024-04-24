@@ -243,8 +243,8 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
   { 'nvim-tree/nvim-tree.lua', opts = {} },
+  { 'nvim-tree/nvim-web-devicons', opts = {} },
   -- { 'windwp/nvim-autopairs', opts = {} },
-  -- { 'vimwiki/vimwiki', opts = {} },
   -- { 'artempyanykh/marksman', opts = {} },
   -- { 'mattn/emmet-vim', opts = {} },
   -- { 'mattn/webapi-vim', opts = {} },
@@ -337,6 +337,34 @@ require('lazy').setup({
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
+      {
+        'vimwiki/vimwiki',
+        branch = 'dev',
+        dependencies = { 'mattn/calendar-vim' },
+        init = function()
+          vim.g.vimwiki_list = {
+            { path = '~/vimwiki', path_html = '~/vimwiki/public_html', auto_tags = 1, auto_diary_index = 1, syntax = 'markdown', ext = '.md' },
+            -- experimental folder for markdown conversion
+            { path = '~/projects/vimwiki', path_html = '~/projects/vimwiki_markdown/public_html', syntax = 'markdown', ext = '.md' },
+          }
+          vim.g.vimwiki_markdown_link_ext = 1
+          vim.g.vimwiki_stripsym = ' '
+          vim.g.vimwiki_global_ext = 0
+        end,
+      },
+      --[[ {
+        'vimwiki/vimwiki',
+        init = function()
+          vim.g.vimwiki_list = {
+            {
+              path = '~/docs/vimwiki',
+              syntax = 'default',
+              ext = '.wiki',
+            },
+          }
+          vim.g.vimwiki_ext2syntax = { ['.md'] = 'markdown', ['.markdown'] = 'markdown', ['.mdown'] = 'markdown' }
+        end,
+      }, ]]
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
