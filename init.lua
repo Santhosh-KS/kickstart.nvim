@@ -343,9 +343,9 @@ require('lazy').setup({
         dependencies = { 'mattn/calendar-vim' },
         init = function()
           vim.g.vimwiki_list = {
-            { path = '~/vimwiki', path_html = '~/vimwiki/public_html', auto_tags = 1, auto_diary_index = 1, syntax = 'markdown', ext = '.md' },
+            { path = '~/.extensions', path_html = '~/.extensions/public_html', auto_tags = 1, auto_diary_index = 1, syntax = 'markdown', ext = '.md' },
             -- experimental folder for markdown conversion
-            { path = '~/projects/vimwiki', path_html = '~/projects/vimwiki_markdown/public_html', syntax = 'markdown', ext = '.md' },
+            { path = '~/.extensions/vimwiki', path_html = '~/.extensions/vimwiki_markdown/public_html', syntax = 'markdown', ext = '.md' },
           }
           vim.g.vimwiki_markdown_link_ext = 1
           vim.g.vimwiki_stripsym = ' '
