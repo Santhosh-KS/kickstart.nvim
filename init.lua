@@ -170,6 +170,11 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<cr>', { desc = 'Open the nerdtree view' })
 vim.keymap.set('n', '<leader>C', '<cmd>Calendar<cr>', { desc = 'Open the calender in the sidbar' })
 vim.keymap.set('n', '<leader>R', '<cmd>source ~/work/nvimStuff/snippets/lua.lua<CR>', { desc = 'Reload neovim file' })
+-- date +"Date:%d/%m/%Y %nTime:%r %p %nCW:%W %nDay:%j"
+-- vim.keymap.set('n', '<leader>T', '<cmd>!date +"Date:%d/%m/%Y %nTime:%r %p %nCW:%W %nDay:%j"<CR>', { desc = 'Reload neovim file' })
+vim.keymap.set('n', '<leader>dt', '<cmd>!date >> %<cr>', { desc = 'Current date and time' })
+vim.keymap.set('n', '<leader>gcb', '<cmd>echo nvim_get_current_buf()<cr>', { desc = 'get current buffer number' })
+
 --
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
