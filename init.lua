@@ -174,6 +174,8 @@ vim.keymap.set('n', '<leader>R', '<cmd>source ~/work/nvimStuff/snippets/lua.lua<
 -- vim.keymap.set('n', '<leader>T', '<cmd>!date +"Date:%d/%m/%Y %nTime:%r %p %nCW:%W %nDay:%j"<CR>', { desc = 'Reload neovim file' })
 vim.keymap.set('n', '<leader>dt', '<cmd>!date >> %<cr>', { desc = 'Current date and time' })
 vim.keymap.set('n', '<leader>gcb', '<cmd>echo nvim_get_current_buf()<cr>', { desc = 'get current buffer number' })
+vim.keymap.set('n', '<S-h>', '<cmd>bn <cr>', { desc = 'jumpto next buffer' })
+vim.keymap.set('n', '<S-l>', '<cmd>bp <cr>', { desc = 'jumpto prev buffer' })
 
 --
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -349,7 +351,14 @@ require('lazy').setup({
         dependencies = { 'mattn/calendar-vim' },
         init = function()
           vim.g.vimwiki_list = {
-            { path = '~/.extensions', path_html = '~/.extensions/public_html', auto_tags = 1, auto_diary_index = 1, syntax = 'markdown', ext = '.md' },
+            {
+              path = '~/.extensions',
+              path_html = '~/.extensions/public_html',
+              auto_tags = 1,
+              auto_diary_index = 1,
+              syntax = 'markdown',
+              ext = '.md',
+            },
             -- experimental folder for markdown conversion
             { path = '~/.extensions/vimwiki', path_html = '~/.extensions/vimwiki_markdown/public_html', syntax = 'markdown', ext = '.md' },
           }
@@ -487,6 +496,7 @@ require('lazy').setup({
       --    That is to say, every time a new file is opened that is associated with
       --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
       --    function will be executed to configure the current buffer
+      --
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
@@ -495,6 +505,7 @@ require('lazy').setup({
           --
           -- In this case, we create a function that lets us more easily define mappings specific
           -- for LSP related items. It sets the mode, buffer and description for us each time.
+
           local map = function(keys, func, desc)
             vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
@@ -577,6 +588,14 @@ require('lazy').setup({
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
+      -- Sourcekit LSP support for Swift LSP. Swift is always a wiered one
+      local lspconfig = require 'lspconfig'
+      lspconfig.sourcekit.setup {
+        capabilities = capabilities,
+      }
+      --[[ lspconfig.elmls.setup {
+        capabilities = capabilities,
+      } ]]
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -589,8 +608,9 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        pyright = {},
+        elmls = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
@@ -614,14 +634,6 @@ require('lazy').setup({
             },
           },
         },
-        --[[ sourcekit = {
-          cmd = { '/home/statemate/.local/bin/sourcekit-lsp' },
-          filetypes = { '.swift' },
-          handlers = {
-            ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, require('config.ui').borders),
-            ['txtdocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, require('config.ui').borders),
-          },
-        }, ]]
       }
 
       -- Ensure the servers and tools above are installed
@@ -630,8 +642,11 @@ require('lazy').setup({
       --    :Mason
       --
       --  You can press `g?` for help in this menu.
-      require('mason').setup()
-
+      require('mason').setup {
+        --[[ registries = {
+          'file:/home/statemate/work/nvimStuff/fpr/mason-registry',
+        }, ]]
+      }
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -883,7 +898,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'swift', 'elm' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -891,9 +906,10 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        -- additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = true,
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'yaml' } },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
