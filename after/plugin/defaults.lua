@@ -22,7 +22,7 @@ local attach_to_buffer = function(output_bufnr, pattern, command)
         end
       end
 
-      api.nvim_buf_set_lines(output_bufnr, 0, -1, false, { 'output of: *.swift' })
+      api.nvim_buf_set_lines(output_bufnr, 0, -1, false, { 'output of: ' .. pattern })
       vim.fn.jobstart(command, {
         stdout_buffered = true,
         on_stdout = append_data,
@@ -61,6 +61,12 @@ end, {})
   attach_to_buffer(tonumber(bufnr), "*.cpp", {"cmake", "CMakeLists.txt", "&&", "make", "&&", "output"})
  end, {})
  ]]
+
+vim.api.nvim_create_user_command('GoRun', function()
+  local bufnr = vim.fn.input 'Bufnr: '
+  attach_to_buffer(tonumber(bufnr), '*.go', { 'go', 'run', '.' })
+end, {})
+
 vim.api.nvim_create_user_command('CargoRun', function()
   local bufnr = vim.fn.input 'Bufnr: '
   attach_to_buffer(tonumber(bufnr), '*.rs', { 'cargo', 'run' })

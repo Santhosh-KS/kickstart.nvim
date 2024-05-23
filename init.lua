@@ -103,6 +103,8 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
 
+vim.opt.shiftwidth = 2
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
@@ -176,7 +178,15 @@ vim.keymap.set('n', '<leader>dt', '<cmd>!date >> %<cr>', { desc = 'Current date 
 vim.keymap.set('n', '<leader>gcb', '<cmd>echo nvim_get_current_buf()<cr>', { desc = 'get current buffer number' })
 vim.keymap.set('n', '<S-h>', '<cmd>bn <cr>', { desc = 'jumpto next buffer' })
 vim.keymap.set('n', '<S-l>', '<cmd>bp <cr>', { desc = 'jumpto prev buffer' })
+vim.keymap.set('n', '<leader><leader>q', '<cmd>q!<cr>', { desc = 'close current buffer without saving' })
+vim.keymap.set('n', 'bc', '<cmd>BufferClose<CR>', { desc = 'Reload neovim file' })
 
+-- Adjust the split size
+-- [FromThisVideo](https://www.youtube.com/watch?v=kJVqxFnhIuw&list=PLep05UYkc6wRcB9dxdXkc5tYHlpQFlRUF&index=2)
+vim.keymap.set('n', '<M-,>', '<c-w>5<')
+vim.keymap.set('n', '<M-.>', '<c-w>5>')
+vim.keymap.set('n', '<M-t>', '<c-w>+')
+vim.keymap.set('n', '<M-s>', '<c-w>-')
 --
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -592,10 +602,9 @@ require('lazy').setup({
       local lspconfig = require 'lspconfig'
       lspconfig.sourcekit.setup {
         capabilities = capabilities,
+        cmd = { 'sourcekit-lsp' },
+        filetypes = { 'swift', 'c', 'cpp', 'objective-c', 'objective-cpp' },
       }
-      --[[ lspconfig.elmls.setup {
-        capabilities = capabilities,
-      } ]]
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -606,8 +615,8 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
+        clangd = {},
+        gopls = {},
         pyright = {},
         elmls = {},
         rust_analyzer = {},
@@ -617,7 +626,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        tsserver = {},
         --
 
         lua_ls = {
@@ -652,6 +661,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'elm-format',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -677,7 +687,10 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          require('conform').format {
+            async = true,
+            lsp_fallback = true,
+          }
         end,
         mode = '',
         desc = '[F]ormat buffer',
@@ -697,12 +710,13 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        elm = { 'elm-fromat' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        javascript = { { 'prettierd', 'prettier' } },
       },
     },
   },
@@ -710,6 +724,7 @@ require('lazy').setup({
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
+    -- event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     dependencies = {
       -- Snippet Engine & its associated nvim-cmp source
       {
@@ -727,15 +742,50 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          --[[ {
+          {
             'rafamadriz/friendly-snippets',
             config = function()
               require('luasnip.loaders.from_vscode').lazy_load()
             end,
-          }, ]]
+          },
         },
+        config = function()
+          local ls = require 'luasnip'
+          local types = require 'luasnip.util.types'
+
+          ls.config.set_config {
+            history = true,
+            updateevents = 'TextChanged,TextChangedI',
+            enable_autosnippets = true,
+            ext_opts = {
+              [types.choiceNode] = {
+                active = {
+                  virt_text = { { '<--', 'Error' } },
+                },
+              },
+            },
+          }
+          -- Key to trigger the completion for the snippets
+          --[[ vim.keymaps.set({ 'i', 's' }, '<c-k>', function()
+            if ls.expand_or_jumpable() then
+              ls.expand_or_jump()
+            end
+          end, { silent = true })
+
+          vim.keymaps.set({ 'i', 's' }, '<c-j>', function()
+            if ls.jumpable(-1) then
+              ls.jump(-1)
+            end
+          end, { silent = true })
+
+          vim.keymaps.set({ 'i' }, '<c-l>', function()
+            if ls.choice_active() then
+              ls.change_choice(1)
+            end
+          end, { silent = true }) ]]
+        end,
       },
-      'saadparwaiz1/cmp_luasnip',
+      { 'saadparwaiz1/cmp_luasnip', opts = {} },
 
       -- Adds other completion capabilities.
       --  nvim-cmp does not ship with all sources by default. They are split
