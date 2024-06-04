@@ -52,6 +52,11 @@ vim.api.nvim_create_user_command('Swiftrun', function()
   attach_to_buffer(tonumber(bufnr), '*.swift', { 'swift', 'run' })
 end, {})
 
+vim.api.nvim_create_user_command('Crun', function()
+  local bufnr = vim.fn.input 'Bufnr: '
+  attach_to_buffer(tonumber(bufnr), '*.c', { 'make', 'run' })
+end, {})
+
 vim.api.nvim_create_user_command('Swiftbuild', function()
   local bufnr = vim.fn.input 'Bufnr: '
   attach_to_buffer(tonumber(bufnr), '*.swift', { 'swift', 'build' })
